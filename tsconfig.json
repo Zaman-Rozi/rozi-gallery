@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "strict": false, // Disable all strict type checking options
+    "noEmitOnError": false, // Allow output generation even if there are type errors
+    "noImplicitAny": false, // Allow variables and parameters to have an implicit 'any' type
+    "strictNullChecks": false, // Allow null and undefined to be assigned to any type
+    "strictFunctionTypes": false, // Disable strict checking of function types
+    "strictPropertyInitialization": false, // Disable strict checking of class property initialization
+    "noImplicitThis": false, // Allow 'this' to be implicitly 'any'
+    "alwaysStrict": false, // Disable automatic strict mode
+    "allowJs": true, // Allow JavaScript files to be compiled
+    "skipLibCheck": true, // Skip type checking of all declaration files (*.d.ts)
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve"
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
