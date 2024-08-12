@@ -1,6 +1,6 @@
 import CustomModal from '@/components/common/modal';
 import useUserDashboard from '@/hooks/useUserDashboard';
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, CircularProgress } from '@mui/material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -14,6 +14,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Spinner } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
+import React from 'react';
 
 const GallaryItem = () => {
     const {
@@ -23,11 +24,13 @@ const GallaryItem = () => {
         getGallaryLoading,
         filesURLs,
         selectedImageURL,
-        setSelectedImageURL
+        setSelectedImageURL,
+        downloadImagesAsZip,
+        downloading
     } = useUserDashboard()
 
     return (
-        <Box>
+        <Box >
             <Box maxWidth={500} mx={'auto'}>
                 <Card>
                     <CardHeader subheader="Access your gallary" title="Gallary" />
@@ -62,6 +65,15 @@ const GallaryItem = () => {
                 </Card>
             </Box>
             {
+                downloading ?
+                    <CircularProgress style={{ margin: '1rem auto', display: 'block' }} /> :
+                    filesURLs?.filesUrls && filesURLs?.filesUrls?.length > 0 ?
+                        <Button style={{ height: '48px', maxWidth: '130px', margin: '1rem auto', display: 'block' }} disabled={getGallaryLoading} onClick={() => downloadImagesAsZip({ urls: filesURLs?.filesUrls })} fullWidth variant="text">
+                            Download all
+                        </Button> :
+                        null
+            }
+            {
                 filesURLs?.filesUrls && filesURLs?.filesUrls?.length > 0 &&
                 <Box width={'fit-content'} mx={'auto'} mt={4}>
                     <Card>
@@ -69,7 +81,7 @@ const GallaryItem = () => {
                         <Box width={'content-fit'} p={'16px'} display={'flex'} gap={'16px'} flexWrap={'wrap'}>
                             {
                                 filesURLs?.filesUrls?.map((url: string) => (
-                                    <Image onClick={()=>setSelectedImageURL(url)} style={{ borderRadius: '16px', cursor: 'pointer' }} width={200} height={200} src={url} alt='Image' />
+                                    <Image onClick={() => setSelectedImageURL(url)} style={{ borderRadius: '16px', cursor: 'pointer' }} width={200} height={200} src={url} alt='Image' />
                                 ))
                             }
                         </Box>

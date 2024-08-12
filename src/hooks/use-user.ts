@@ -1,8 +1,7 @@
 
 'use client'
 import { db } from '@/confiq/firebase';
-import { selectAdmin } from '@/store/selectors/admin';
-import { selectToken, selectUser } from '@/store/selectors/aurh';
+import { selectAdmin, selectToken, selectUser } from '@/store/selectors/aurh';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
 

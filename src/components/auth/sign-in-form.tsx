@@ -20,10 +20,9 @@ import { z as zod } from 'zod';
 
 import { authClient } from '@/lib/auth/client';
 import { paths } from '@/paths';
-import { addUser, updateToken } from '@/store/reducers/auth';
+import { addUser, updateAdmin, updateToken } from '@/store/reducers/auth';
 import { usePathname } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { updateAdmin } from '@/store/reducers/admin';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/confiq/firebase';
 
@@ -62,6 +61,7 @@ export function SignInForm(): React.JSX.Element {
         querySnapshot.forEach((doc: any) => {
           dispath(addUser({ ...res?.data, ...doc.data() }))
         });
+
         if (res?.type === 'success') {
           dispath(updateToken(res?.data?.uid))
           dispath(updateAdmin(res?.admin))

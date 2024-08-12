@@ -6,14 +6,6 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'fire
 import { addDoc, collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
 
 
-const user = {
-  id: 'USR-000',
-  avatar: '/assets/avatar.png',
-  firstName: 'Sofia',
-  lastName: 'Rivers',
-  email: 'sofia@devias.io',
-} satisfies User;
-
 export interface SignUpParams {
   firstName: string;
   lastName: string;
@@ -40,6 +32,20 @@ class AuthClient {
   async signUp(values: SignUpParams): Promise<any> {
     const { email, password } = values;
     try {
+      const usersCollection = collection(db, 'allowedUsers');
+      const q = query(usersCollection, where('email', '==', email));
+      try {
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+          return {
+            message: 'Please contact with admin.',
+            type: 'error',
+          }
+        }
+      } catch (error) {
+        console.error('Error checking value: ', error);
+        return
+      }
       const { user } = await createUserWithEmailAndPassword(auth, email, password)
       await setDoc(doc(db, "Users", user?.uid), {
         uid: user?.uid,
@@ -123,7 +129,7 @@ class AuthClient {
       return { data: null };
     }
 
-    return { data: user };
+    return { };
   }
 }
 

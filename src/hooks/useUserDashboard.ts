@@ -7,9 +7,12 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 const useUserDashboard = () => {
     const [state, setState] = useState<any>({})
+    const [downloading, setDownloading] = useState<any>(false)
     const [popupState, setPopupState] = useState<any>({
         popupState: ""
     })
@@ -118,8 +121,8 @@ const useUserDashboard = () => {
                         console.log(error);
                     } finally {
                         setState({
-                            password:"",
-                            key:""
+                            password: "",
+                            key: ""
                         })
                         setLoading(false)
                     }
@@ -173,6 +176,42 @@ const useUserDashboard = () => {
         }
     }
 
+    const downloadImagesAsZip = async ({ urls }: any) => {
+        setDownloading(true)
+        const zip = new JSZip();
+        const imgFolder = zip.folder('images');
+
+        const fetchImage = async (url) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const blob = await response.blob();
+                return blob;
+            } catch (error) {
+                console.error('Error fetching image:', error);
+                return null;
+            }
+        };
+
+        for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
+            const blob = await fetchImage(url);
+            if (blob) {
+                imgFolder.file(`image${i + 1}.jpg`, blob);
+            }
+        }
+
+        zip.generateAsync({ type: 'blob' }).then((content) => {
+            saveAs(content, 'images.zip');
+            setDownloading(false)
+        }).catch((error)=>{
+            console.log(error);
+            setDownloading(false)
+        })
+    };
+
     const handleGetGallary = (type: string, data?: any) => {
         if (type === 'password') {
             setPopupState({ ...popupState, password: data?.target?.value })
@@ -196,7 +235,9 @@ const useUserDashboard = () => {
         selectedImageURL,
         setSelectedImageURL,
         successPopup,
-        setSuccessPopup
+        setSuccessPopup,
+        downloadImagesAsZip,
+        downloading
     }
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 import { useUser } from '@/hooks/use-user';
@@ -14,8 +14,11 @@ export interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element | null {
   const router = useRouter();
   const { token } = useUser();
+  const searchParams = useSearchParams();
+  const key = searchParams.get("key");
+  const gallaryId = searchParams.get("id");
 
-  if (!token) {
+  if (!token && !key && !gallaryId) {
     logger.debug('[AuthGuard]: User is not logged in, redirecting to sign in');
     router.replace(paths.auth.signIn);
     return null

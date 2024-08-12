@@ -4,6 +4,7 @@ const innitialState = {
     user: {},
     token: null,
     gallaries: [],
+    admin:false
 }
 
 const auth = createSlice({
@@ -25,9 +26,12 @@ const auth = createSlice({
         },
         updateUserGalleries: (state, action) => {
             state.gallaries = action.payload
+        },
+        updateAdmin: (state, action) => {
+            state.admin = action.payload
         }
     },
 })
 
-export const { addUser, updateToken, updateUserGalleries , updateUser } = auth.actions
+export const { addUser, updateToken, updateUserGalleries , updateUser , updateAdmin} = auth.actions
 export { auth }
