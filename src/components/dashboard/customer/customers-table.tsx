@@ -108,10 +108,10 @@ export function CustomersTable({
                     {`${process.env.frontEndURL}/dashboard?key=${row?.id?.split(';')[0]}&id=${galleryId}`}
                     {/* {row?.address?.city}, {row?.address?.state}, {row?.address?.country} */}
                   </TableCell>
-                  <TableCell>{row?.userDetails?.firstName}</TableCell>
-                  <TableCell>{row?.userDetails?.lastName}</TableCell>
-                  <TableCell>{row?.userDetails?.email}</TableCell>
-                  <TableCell>{row?.userDetails?.phone}</TableCell>
+                  <TableCell>{row?.userDetails?.firstName || "Not Provided"}</TableCell>
+                  <TableCell>{row?.userDetails?.lastName || "Not Provided"}</TableCell>
+                  <TableCell>{row?.userDetails?.email || "Not Provided"}</TableCell>
+                  <TableCell>{row?.userDetails?.phone || "Not Provided"}</TableCell>
                   {/* 
                   <TableCell>{row?.phone}</TableCell>
                   <TableCell>{dayjs(row?.createdAt).format('MMM D, YYYY')}</TableCell> */}
