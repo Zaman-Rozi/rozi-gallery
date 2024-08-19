@@ -72,9 +72,37 @@ const AddDataContainer = () => {
                     <Divider />
                     <CardContent>
                         <Grid md={6} xs={12}>
+                            <FormControl fullWidth>
+                                <InputLabel>First Name</InputLabel>
+                                <OutlinedInput disabled={loading} value={state?.firstName}  onChange={(e: any) => handleMethod('firstName', e)} />
+                                {errors?.firstNameError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
+                            </FormControl>
+                        </Grid>
+                        <Grid md={6} xs={12} mt={4}>
+                            <FormControl fullWidth>
+                                <InputLabel>Last Name</InputLabel>
+                                <OutlinedInput disabled={loading} value={state?.lastName}  onChange={(e: any) => handleMethod('lastName', e)} />
+                                {errors?.lastNameError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
+                            </FormControl>
+                        </Grid>
+                        <Grid md={6} xs={12} mt={4}>
+                            <FormControl fullWidth>
+                                <InputLabel>Email</InputLabel>
+                                <OutlinedInput disabled={loading} type='email' value={state?.email}  onChange={(e: any) => handleMethod('email', e)} />
+                                {errors?.emailError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
+                            </FormControl>
+                        </Grid>
+                        <Grid md={6} xs={12} mt={4}>
+                        <FormControl fullWidth>
+                                <InputLabel>Phone Number</InputLabel>
+                                <OutlinedInput disabled={loading} value={state?.phone}  onChange={(e: any) => handleMethod('phone', e)} />
+                                {errors?.phoneError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
+                            </FormControl>
+                        </Grid>
+                        <Grid md={6} xs={12} mt={4}>
                             <FormControl fullWidth required>
                                 <InputLabel>Secret key</InputLabel>
-                                <OutlinedInput disabled={loading} value={state?.key} label="First name" name="firstName" onChange={(e: any) => handleMethod('key', e)} />
+                                <OutlinedInput disabled={loading} value={state?.key}  onChange={(e: any) => handleMethod('key', e)} />
                                 {errors?.keyError ? <FormHelperText>{'Minimum 3 digits key allowed.'}</FormHelperText> : null}
 
                             </FormControl>
@@ -82,7 +110,7 @@ const AddDataContainer = () => {
                         <Grid md={6} xs={12} mt={4}>
                             <FormControl fullWidth required>
                                 <InputLabel>Password</InputLabel>
-                                <OutlinedInput disabled={loading} value={state?.password} label="First name" name="firstName" onChange={(e: any) => handleMethod('password', e)} />
+                                <OutlinedInput disabled={loading} value={state?.password}  onChange={(e: any) => handleMethod('password', e)} />
                                 {errors?.passwordError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
                             </FormControl>
                         </Grid>

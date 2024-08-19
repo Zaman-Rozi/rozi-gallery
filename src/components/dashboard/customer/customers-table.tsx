@@ -72,8 +72,10 @@ export function CustomersTable({
               <TableCell>Key</TableCell>
               <TableCell>Password</TableCell>
               <TableCell>URL</TableCell>
-              {/* <TableCell>Password</TableCell> */}
-              {/* <TableCell>Phone</TableCell> */}
+              <TableCell>First Name</TableCell>
+              <TableCell>Last Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Phone</TableCell>
               {/* <TableCell>Signed Up</TableCell> */}
             </TableRow>
           </TableHead>
@@ -102,10 +104,14 @@ export function CustomersTable({
                   {/* </Stack> */}
                   <TableCell>{row?.id?.split(';')[0]}</TableCell>
                   <TableCell>{row?.id?.split(';')[1]}</TableCell>
-                  <TableCell>
+                  <TableCell style={{maxWidth:"200px", overflow:"auto"}}>
                     {`${process.env.frontEndURL}/dashboard?key=${row?.id?.split(';')[0]}&id=${galleryId}`}
                     {/* {row?.address?.city}, {row?.address?.state}, {row?.address?.country} */}
                   </TableCell>
+                  <TableCell>{row?.userDetails?.firstName}</TableCell>
+                  <TableCell>{row?.userDetails?.lastName}</TableCell>
+                  <TableCell>{row?.userDetails?.email}</TableCell>
+                  <TableCell>{row?.userDetails?.phone}</TableCell>
                   {/* 
                   <TableCell>{row?.phone}</TableCell>
                   <TableCell>{dayjs(row?.createdAt).format('MMM D, YYYY')}</TableCell> */}

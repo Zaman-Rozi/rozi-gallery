@@ -55,19 +55,47 @@ export function SignInForm(): React.JSX.Element {
     async (values: any): Promise<void> => {
       setIsPending(true);
       try {
+        let blockedS = false
+        let deletedS = false
         const res = await authClient.signInWithPassword({ ...values, isAdminLogin: pathname === '/auth/admin/sign-in' });
         const q = await query(collection(db, "Users"), where("email", "==", values?.email));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc: any) => {
-          dispath(addUser({ ...res?.data, ...doc.data() }))
+          const { blocked, deleted } = doc?.data()
+          
+          if (blocked) {
+            blockedS = true
+          }
+          if (deleted) {
+            deletedS = true
+          }
+          if (!deleted && !blocked) {
+            dispath(addUser({ ...res?.data, ...doc.data() }))
+          }
         });
 
-        if (res?.type === 'success') {
+        if (res?.type === 'success' && !blockedS && !deletedS) {
           dispath(updateToken(res?.data?.uid))
           dispath(updateAdmin(res?.admin))
         }
 
-        if (res?.type && res?.message) {
+        if (blockedS && !deletedS) {
+          setError('root', {
+            type: 'error',
+            message: 'You are blocked'
+          });
+          setIsPending(false);
+        }
+
+        if (blockedS && deletedS) {
+          setError('root', {
+            type: 'error',
+            message: 'User not exist'
+          });
+          setIsPending(false);
+        }
+
+        if (res?.type && res?.message && !blockedS && !deletedS) {
           setError('root', {
             type: res?.type,
             message: res?.message

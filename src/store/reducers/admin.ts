@@ -4,7 +4,7 @@ const innitialState = {
     users: [],
     admin: false,
     gallaries: [],
-    admins:[]
+    admins: []
 }
 
 const admin = createSlice({
@@ -17,6 +17,31 @@ const admin = createSlice({
         updateAdminUsers: (state, action) => {
             state.users = action.payload
         },
+        removeAdminUser: (state, action) => {
+            const { id } = action.payload
+            if (id) {
+                state.users = state.users.map((user: any) => {
+                    if (user['id'] !== id) {
+                        return user
+                    }
+                })
+            }
+        },
+        updateAdminUser: (state, action) => {
+            const { id, data } = action.payload
+            if (id && data) {
+                state.users = state.users.map((user: any) => {
+                    if (user['id'] === id) {
+                        return {
+                            ...user,
+                            ...data
+                        }
+                    } else {
+                        return user
+                    }
+                })
+            }
+        },
         updateAdminGallaries: (state, action) => {
             state.gallaries = action.payload
         },
@@ -26,5 +51,5 @@ const admin = createSlice({
     },
 })
 
-export const { updateAdminUsers, updateAdmin, updateAdminGallaries , updateAdmins} = admin.actions
+export const { updateAdminUsers, updateAdmin, updateAdminGallaries, updateAdmins, updateAdminUser , removeAdminUser} = admin.actions
 export { admin }

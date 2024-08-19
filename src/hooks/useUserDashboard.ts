@@ -110,11 +110,18 @@ const useUserDashboard = () => {
 
                         await setDoc(specificDocRef,
                             {
-                                filesUrls: arrayUnion(...filesUrls)
+                                filesUrls: arrayUnion(...filesUrls),
+                                userDetails: {
+                                firstName: state.firstName,
+                                lastName: state.lastName,
+                                email: state.email,
+                                phone: state.phone,
+                                }
                             },
                             {
                                 merge: true
-                            }
+                            },
+                            
                         );
                         setSuccessPopup(true)
                     } catch (error) {
@@ -139,7 +146,7 @@ const useUserDashboard = () => {
     }
 
     const handleMethod = (type: string, data?: any) => {
-        if (type === 'key' || type === 'password') {
+        if (type === 'key' || type === 'password' || type === 'firstName' || type === 'lastName' || type === 'email' || type === 'phone') {
             onChangeHandler(type, data)
         }
         if (type === 'upload') {

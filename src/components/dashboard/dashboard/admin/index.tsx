@@ -44,10 +44,17 @@ export default function AdminDashboard() {
         try {
             const queryResOfUsers = await getDocs(usersCollectionRef);
             const queryResOfAdmin = await getDocs(adminsCollectionRef);
-            const usersData = queryResOfUsers.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const usersData = []
+            queryResOfUsers.docs.forEach((doc) => {
+                if (!doc?.data()?.deleted) {
+                    usersData.push(
+                        {
+                            id: doc.id,
+                            ...doc.data()
+                        }
+                    )
+                }
+            });
             const adminsData = queryResOfAdmin.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data()
@@ -116,6 +123,7 @@ export default function AdminDashboard() {
                                 <CircularProgress />
                             </Box> :
                             <UsersTable
+                                getAdminUsers={getAdminUsers}
                                 navigateHandler={navigateHandler}
                                 admins={admins}
                                 count={adminUsers?.length}

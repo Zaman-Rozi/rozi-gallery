@@ -16,7 +16,13 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 
 import { useSelection } from '@/hooks/use-selection';
-import { Button, Link } from '@mui/material';
+import { Button, CircularProgress, Link, Switch } from '@mui/material';
+import { db } from '@/confiq/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import CustomModal from '@/components/common/modal';
+import { Lock, LockKey, Trash } from '@phosphor-icons/react';
+import { useDispatch } from 'react-redux';
+import { removeAdminUser, updateAdminUser } from '@/store/reducers/admin';
 
 function noop(): void {
     // do nothing
@@ -39,8 +45,9 @@ interface CustomersTableProps {
     rowsPerPage?: number;
     admins?: any[]
     navigateHandler?: any
-    setRowsPerPage?:any;
-    setPage?:any;
+    setRowsPerPage?: any;
+    setPage?: any;
+    getAdminUsers?: any;
 }
 
 export function UsersTable({
@@ -51,13 +58,55 @@ export function UsersTable({
     admins = [],
     navigateHandler = () => { },
     setRowsPerPage,
-    setPage
+    setPage,
+    getAdminUsers
 }: CustomersTableProps): React.JSX.Element {
     const rowIds = React.useMemo(() => {
-        return rows.map((customer) => customer.id);
+        return rows?.map((customer) => customer?.id);
     }, [rows]);
+    const [blockModak, setBlockModal] = React.useState(false)
+    const [blockLoading, setBlockLoading] = React.useState(false)
+    const [blockModakData, setBlockModalData] = React.useState<any>({})
+    const [removeModal, setRemoveModal] = React.useState(false)
+    const [removeLoading, setRemoveLoading] = React.useState(false)
+    const [removeModakData, setRemoveModalData] = React.useState<any>({})
 
     const { selectOne, deselectOne, selected } = useSelection(rowIds);
+    const dispatch = useDispatch()
+
+    const blockUnblockHandlet = async (item: any) => {
+        setBlockLoading(true)
+        try {
+            const docRef = doc(db, 'Users', item?.id);
+            await updateDoc(docRef, {
+                ...item,
+                blocked: !item?.blocked
+            });
+            dispatch(updateAdminUser({ id: item?.id, data: { blocked: !item?.blocked } }))
+        } catch (error) {
+            console.error('Error updating document:', error);
+        } finally {
+            setBlockLoading(false)
+            setBlockModal(false)
+        }
+    }
+    const deleteHandler = async (item: any) => {
+        setRemoveLoading(true)
+        try {
+            const docRef = doc(db, 'Users', item?.id);
+            await updateDoc(docRef, {
+                ...item,
+                deleted: true
+            });
+            dispatch(removeAdminUser({ id: item?.id }))
+            getAdminUsers()
+        } catch (error) {
+            console.error('Error updating document:', error);
+        } finally {
+            setRemoveLoading(false)
+            setRemoveModal(false)
+        }
+    }
 
 
     return (
@@ -70,16 +119,15 @@ export function UsersTable({
                             <TableCell>F/Name</TableCell>
                             <TableCell>L/Name</TableCell>
                             <TableCell>Email</TableCell>
-                            <TableCell>Terms</TableCell>
-                            <TableCell>isAdmin</TableCell>
-                            <TableCell>about</TableCell>
+                            <TableCell>Blocked</TableCell>
+                            <TableCell>Admin</TableCell>
+                            <TableCell>Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {rows.map((row: any, i) => {
-                            const isSelected = selected?.has(row.id);
                             return (
-                                <TableRow hover key={row.id} selected={isSelected}>
+                                <TableRow onClick={() => navigateHandler(row?.uid)} style={{ cursor: 'pointer' }} hover key={row?.id}>
                                     <TableCell>
                                         {i + 1}
                                     </TableCell>
@@ -95,18 +143,12 @@ export function UsersTable({
                                     <TableCell>
                                         {row?.email}
                                     </TableCell>
+
                                     <TableCell padding="checkbox">
-                                        <Checkbox
-                                            checked={row?.terms}
-                                            onChange={(event) => {
-                                                if (event.target.checked) {
-                                                    selectOne(row.id);
-                                                } else {
-                                                    deselectOne(row.id);
-                                                }
-                                            }}
-                                            disabled
-                                        />
+                                        <Switch onClick={(e:any)=>e?.stopPropagation()} checked={row?.blocked} onChange={() => {
+                                            setBlockModalData(row)
+                                            setBlockModal(true)
+                                        }} />
                                     </TableCell>
                                     <TableCell>
                                         <Checkbox
@@ -122,7 +164,11 @@ export function UsersTable({
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <Button onClick={() => navigateHandler(row?.uid)}>gallaries</Button>
+                                        <Button onClick={(e) => {
+                                            e.stopPropagation()
+                                            setRemoveModalData(row)
+                                            setRemoveModal(true)
+                                        }}>Delete</Button>
                                     </TableCell>
                                 </TableRow>
                             );
@@ -134,11 +180,65 @@ export function UsersTable({
             <TablePagination
                 component="div"
                 count={count}
-                onPageChange={(_ , page)=>setPage(page)}
-                onRowsPerPageChange={(e:any)=>setRowsPerPage(e.target.value)}
+                onPageChange={(_, page) => setPage(page)}
+                onRowsPerPageChange={(e: any) => setRowsPerPage(e.target.value)}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 rowsPerPageOptions={[5, 10, 25]}
+            />
+            <CustomModal
+                open={blockModak}
+                handleClose={() => setBlockModal(false)}
+                child={
+                    <Box
+                        display={'flex'}
+                        justifyContent={'center'}
+                        flexDirection={'column'}
+                        gap={'16px'}
+                        alignItems={'center'}
+                        py={'16px'}
+                    >
+                        <Lock size={'50px'} />
+                        <Typography fontWeight={700}>
+                            {`You really want to ${!blockModakData?.blocked ? "block" : "unblock"} this user`}
+                        </Typography>
+                        <Button
+                            onClick={() => blockUnblockHandlet(blockModakData)}
+                            style={{ fontSize: 16, fontWeight: 700, width: '100%', maxWidth: "300px" }}
+                        >{
+                                blockLoading ? <CircularProgress size={'24px'} /> :
+                                    !blockModakData?.blocked ? "Block" : "Unblock"
+                            }
+                        </Button>
+                    </Box>
+                }
+            />
+            <CustomModal
+                open={removeModal}
+                handleClose={() => setRemoveModal(false)}
+                child={
+                    <Box
+                        display={'flex'}
+                        justifyContent={'center'}
+                        flexDirection={'column'}
+                        gap={'16px'}
+                        alignItems={'center'}
+                        py={'16px'}
+                    >
+                        <Trash size={'50px'} />
+                        <Typography fontWeight={700}>
+                            {`You really want to ${!removeModakData?.deleted ? "delete" : "recover"} this user`}
+                        </Typography>
+                        <Button
+                            onClick={() => deleteHandler(removeModakData)}
+                            style={{ fontSize: 16, fontWeight: 700, width: '100%', maxWidth: "300px" }}
+                        >{
+                                removeLoading ? <CircularProgress size={'24px'} /> :
+                                    !removeModakData?.deleted ? "Delete" : "Recover"
+                            }
+                        </Button>
+                    </Box>
+                }
             />
         </Card>
     );
