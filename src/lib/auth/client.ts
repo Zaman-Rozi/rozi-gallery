@@ -48,8 +48,10 @@ class AuthClient {
       }
       const { user } = await createUserWithEmailAndPassword(auth, email, password)
       await setDoc(doc(db, "Users", user?.uid), {
+        deleted:false,
         blocked:false,
         uid: user?.uid,
+        gallariesLimit:20,
         ...values
       });
       return user

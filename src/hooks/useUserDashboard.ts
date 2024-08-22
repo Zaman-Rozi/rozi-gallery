@@ -2,17 +2,17 @@
 
 import { db, storage } from '@/confiq/firebase';
 import { useUser } from '@/hooks/use-user';
-import { arrayUnion, collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { saveAs } from 'file-saver';
+import { arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import JSZip from 'jszip';
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
 
 const useUserDashboard = () => {
     const [state, setState] = useState<any>({})
     const [downloading, setDownloading] = useState<any>(false)
+    const [limitOut, setLimitOut] = useState<any>(false)
     const [popupState, setPopupState] = useState<any>({
         popupState: ""
     })
@@ -27,6 +27,7 @@ const useUserDashboard = () => {
     const [successPopup, setSuccessPopup] = useState<boolean>(false)
     const [selectedImageURL, setSelectedImageURL] = useState<any>(null)
     const [getGallaryLoading, setGetGallaryLoading] = useState<boolean>(false)
+    const [totalGalaries, setTotalGalaries] = useState<any[]>([])
     const [filesURLs, updateFilesURL] = useState<any>({})
     const inputRef = useRef<any>()
     const { user } = useUser()
@@ -81,6 +82,49 @@ const useUserDashboard = () => {
         setState({ ...state, [type]: e?.target?.value })
     }
 
+    const getAllowedReq = async () => {
+        if (!user?.uid) {
+            console.error('User UID is not defined');
+            return 0
+        }
+
+        const usersCollection = collection(db, 'Users');
+        const q = query(usersCollection, where('uid', '==', user.uid));
+
+        try {
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                console.log('No matching documents.');
+                return 0;  // Return 0 or handle this case as needed
+            } else {
+                const galleries = [];
+                querySnapshot.forEach((doc) => {
+                    galleries.push({ id: doc.id, ...doc.data() });
+                });
+                return Number(galleries?.[0]?.gallariesLimit);  // Return the retrieved documents
+            }
+        } catch (error) {
+            console.error('Error checking value: ', error);
+
+            return 0
+        }
+    };
+
+    const getGalleriesL = async () => {
+        const collectionRef = collection(db, 'Gallaries', user?.uid, 'Gallary');
+        try {
+            const querySnapshot = await getDocs(collectionRef);
+            const galleriesData = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+            }));
+            return galleriesData?.length || 0
+        } catch (error) {
+            console.error("Error getting galleries data: ", error);
+            return 0
+        }
+    }
+
     const onSubmitHandler = async () => {
         const { key, password, selectFiles } = state
         if (!selectFiles) {
@@ -91,9 +135,20 @@ const useUserDashboard = () => {
             return
         }
         if (key && password && selectFiles) {
+            setLoading(true)
             if (selectFiles.length > 0) {
+                const totalGallaries: number = await getGalleriesL()
+                const allowNoOfGallaries: number = await getAllowedReq()
+                // @ts-ignore
+                if (totalGallaries >= allowNoOfGallaries) {
+                    setLimitOut(true)
+                    setLoading(false)
+                    return
+                } else {
+                    setLimitOut(false)
+                }
+
                 inputRef.current.value = null
-                setLoading(true)
                 let filesUrls: string[] = await Promise.all(
                     selectFiles.map(async (file: any) => {
                         const storageRef = ref(storage, file?.name || 'others');
@@ -112,16 +167,16 @@ const useUserDashboard = () => {
                             {
                                 filesUrls: arrayUnion(...filesUrls),
                                 userDetails: {
-                                firstName: state.firstName,
-                                lastName: state.lastName,
-                                email: state.email,
-                                phone: state.phone,
+                                    firstName: state.firstName,
+                                    lastName: state.lastName,
+                                    email: state.email,
+                                    phone: state.phone,
                                 }
                             },
                             {
                                 merge: true
                             },
-                            
+
                         );
                         setSuccessPopup(true)
                     } catch (error) {
@@ -213,7 +268,7 @@ const useUserDashboard = () => {
         zip.generateAsync({ type: 'blob' }).then((content) => {
             saveAs(content, 'images.zip');
             setDownloading(false)
-        }).catch((error)=>{
+        }).catch((error) => {
             console.log(error);
             setDownloading(false)
         })
@@ -227,6 +282,7 @@ const useUserDashboard = () => {
             getGallaryHandler()
         }
     }
+
     return {
         loading,
         errors,
@@ -244,7 +300,8 @@ const useUserDashboard = () => {
         successPopup,
         setSuccessPopup,
         downloadImagesAsZip,
-        downloading
+        downloading,
+        limitOut
     }
 }
 

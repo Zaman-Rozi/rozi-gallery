@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 
 import { useSelection } from '@/hooks/use-selection';
-import { Button, CircularProgress, Link, Switch } from '@mui/material';
+import { Button, CircularProgress, Input, InputBase, Link, OutlinedInput, Switch } from '@mui/material';
 import { db } from '@/confiq/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import CustomModal from '@/components/common/modal';
@@ -70,7 +70,6 @@ export function UsersTable({
     const [removeModal, setRemoveModal] = React.useState(false)
     const [removeLoading, setRemoveLoading] = React.useState(false)
     const [removeModakData, setRemoveModalData] = React.useState<any>({})
-
     const { selectOne, deselectOne, selected } = useSelection(rowIds);
     const dispatch = useDispatch()
 
@@ -108,6 +107,50 @@ export function UsersTable({
         }
     }
 
+    const updateLimitHandler = async (item: any, limit: number) => {
+        try {
+            const docRef = doc(db, 'Users', item?.uid);
+            await updateDoc(docRef, {
+                ...item,
+                gallariesLimit: limit || 20
+            });
+            dispatch(updateAdminUser({ id: item?.id, data: { gallariesLimit: limit } }))
+            // getAdminUsers()
+        } catch (error) {
+            console.error('Error updating document:', error);
+        } finally {
+            setRemoveLoading(false)
+            setRemoveModal(false)
+        }
+    }
+
+    const MaxLimitCompo = ({ limit, row }: any) => {
+        const [noOfGallaries, setNoOfGallaries] = React.useState<number>(limit || 20)
+        const [editable, setEditable] = React.useState<boolean>(true)
+        return (
+            <Box display={'flex'} gap={'8px'} alignItems={'center'}>
+                <OutlinedInput disabled={editable} onChange={(e: any) => setNoOfGallaries(e.target.value)} value={noOfGallaries} type='number' maxRows={1} onClick={(e) => e.stopPropagation()} defaultValue={20} style={{ maxHeight: "40px", minWidth: "80px", maxWidth: "100px" }} />
+                <Button
+                    style={{
+                        width: '20px',
+                        height: "30px"
+                    }}
+                    variant='outlined'
+                    onClick={() => {
+                        if (!editable) {
+                            updateLimitHandler(row, noOfGallaries)
+                        }
+                        setEditable(!editable)
+                    }}
+                >
+                    {
+                        editable ? "Edit" : "Save"
+                    }
+                </Button>
+            </Box>
+        )
+    }
+
 
     return (
         <Card>
@@ -121,6 +164,7 @@ export function UsersTable({
                             <TableCell>Email</TableCell>
                             <TableCell>Blocked</TableCell>
                             <TableCell>Admin</TableCell>
+                            <TableCell>No. of Gallaries</TableCell>
                             <TableCell>Action</TableCell>
                         </TableRow>
                     </TableHead>
@@ -143,12 +187,13 @@ export function UsersTable({
                                     <TableCell>
                                         {row?.email}
                                     </TableCell>
-
                                     <TableCell padding="checkbox">
-                                        <Switch onClick={(e:any)=>e?.stopPropagation()} checked={row?.blocked} onChange={() => {
-                                            setBlockModalData(row)
-                                            setBlockModal(true)
-                                        }} />
+                                        <Switch
+                                            disabled={admins?.find((admin: any) => admin?.email === row?.email) && admins?.find((admin: any) => admin?.isBlocked === false)}
+                                            onClick={(e: any) => e?.stopPropagation()} checked={row?.blocked} onChange={() => {
+                                                setBlockModalData(row)
+                                                setBlockModal(true)
+                                            }} />
                                     </TableCell>
                                     <TableCell>
                                         <Checkbox
@@ -163,12 +208,17 @@ export function UsersTable({
                                             disabled
                                         />
                                     </TableCell>
+                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                        <MaxLimitCompo limit={row?.gallariesLimit} row={row} />
+                                    </TableCell>
                                     <TableCell>
-                                        <Button onClick={(e) => {
-                                            e.stopPropagation()
-                                            setRemoveModalData(row)
-                                            setRemoveModal(true)
-                                        }}>Delete</Button>
+                                        <Button
+                                            disabled={admins?.find((admin: any) => admin?.email === row?.email) && admins?.find((admin: any) => admin?.isBlocked === false)}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setRemoveModalData(row)
+                                                setRemoveModal(true)
+                                            }}>Delete</Button>
                                     </TableCell>
                                 </TableRow>
                             );

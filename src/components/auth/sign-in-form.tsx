@@ -58,6 +58,21 @@ export function SignInForm(): React.JSX.Element {
         let blockedS = false
         let deletedS = false
         const res = await authClient.signInWithPassword({ ...values, isAdminLogin: pathname === '/auth/admin/sign-in' });
+        const usersCollection = collection(db, 'allowedUsers');
+        const qs = query(usersCollection, where('email', '==', values?.email));
+        try {
+          const querySnapshot = await getDocs(qs);
+          if (querySnapshot.empty) {
+            setError('root', {
+              type: 'error',
+              message: 'Please contact with admin.'
+            });
+            return
+          }
+        } catch (error) {
+          console.error('Error checking value: ', error);
+          return
+        }
         const q = await query(collection(db, "Users"), where("email", "==", values?.email));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc: any) => {
@@ -86,8 +101,7 @@ export function SignInForm(): React.JSX.Element {
           });
           setIsPending(false);
         }
-
-        if (blockedS && deletedS) {
+        if ((!blockedS && deletedS) || (blockedS && deletedS)) {
           setError('root', {
             type: 'error',
             message: 'User not exist'
