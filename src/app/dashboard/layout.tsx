@@ -1,21 +1,48 @@
 'use client'
-import * as React from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import GlobalStyles from '@mui/material/GlobalStyles';
+import * as React from 'react';
 
 import { AuthGuard } from '@/components/auth/auth-guard';
 import { MainNav } from '@/components/dashboard/layout/main-nav';
 import { SideNav } from '@/components/dashboard/layout/side-nav';
+import { useUser } from '@/hooks/use-user';
+import useFirebase from '@/hooks/useFirebase';
 import useUserDashboard from '@/hooks/useUserDashboard';
+import { selectArchivedGallaries, selectUserFolders } from '@/store/selectors/data';
+import { useSelector } from 'react-redux';
 
 interface LayoutProps {
   children: React.ReactNode;
+  params: any;
 }
 
-export default function Layout({ children }: LayoutProps): React.JSX.Element {
+export default function Layout({ children   }: LayoutProps): React.JSX.Element {
+  const { key } = useUserDashboard({})
+  const { admin, user } = useUser()
+  const archivedGallary = useSelector(selectArchivedGallaries)
+  const folders: any[] = useSelector(selectUserFolders)
+  let getArcStories = 1
+  const { getUserFolders, getGallariesByFoldersName } = useFirebase()
 
-  const { key } = useUserDashboard()
+  const getInitialData = async () => {
+    await getUserFolders()
+  };
+  
+  React.useEffect(() => {
+    if (folders && folders?.length > 0) {
+      folders?.forEach((folder: string) => getGallariesByFoldersName({ folderName: folder, userId: user?.uid }))
+    }
+  }, [folders])
+
+
+  React.useEffect(() => {
+    if (archivedGallary?.length === 0 && getArcStories === 1 && !key && !admin) {
+      getArcStories = 0
+      getInitialData()
+    }
+  }, [])
 
   return (
     <AuthGuard>

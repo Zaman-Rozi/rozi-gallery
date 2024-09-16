@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import { useUser } from '@/hooks/use-user';
@@ -9,13 +9,17 @@ import { paths } from '@/paths';
 
 export interface GuestGuardProps {
   children: React.ReactNode;
+  params: any;
 }
 
-export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | null {
+export function GuestGuard({ children, params }: GuestGuardProps): React.JSX.Element | null {
   const router = useRouter();
   const { token } = useUser();
+  const path = usePathname()
 
-  if (token) {
+
+
+  if (token || path.includes("/gallary/")) {
     router.replace(paths.dashboard.overview);
     logger.debug('[GuestGuard]: User is logged in, redirecting to dashboard');
     return null

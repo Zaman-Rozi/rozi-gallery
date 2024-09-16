@@ -17,10 +17,12 @@ import { usePopover } from '@/hooks/use-popover';
 import { MobileNav } from './mobile-nav';
 import { UserPopover } from './user-popover';
 import { useUser } from '@/hooks/use-user';
+import { usePathname } from 'next/navigation';
 
 export function MainNav(): React.JSX.Element {
   const [openNav, setOpenNav] = React.useState<boolean>(false);
-  const {user} = useUser()
+  const { user } = useUser()
+  const path = usePathname()
 
   const userPopover = usePopover<HTMLDivElement>();
 
@@ -69,12 +71,14 @@ export function MainNav(): React.JSX.Element {
                 </IconButton>
               </Badge>
             </Tooltip> */}
-            <Avatar
-              onClick={userPopover.handleOpen}
-              ref={userPopover.anchorRef}
-              src={user?.avatar}
-              sx={{ cursor: 'pointer' }}
-            />
+            {!path.includes("/gallary/") && (
+              <Avatar
+                onClick={userPopover.handleOpen}
+                ref={userPopover.anchorRef}
+                src={user?.avatar}
+                sx={{ cursor: 'pointer' }}
+              />)
+            }
           </Stack>
         </Stack>
       </Box>

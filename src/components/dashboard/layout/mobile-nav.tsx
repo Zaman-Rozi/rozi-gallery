@@ -17,6 +17,7 @@ import type { NavItemConfig } from '@/types/nav';
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
 import { useUser } from '@/hooks/use-user';
+import { PinedGallaries } from './pinedGallaries';
 
 
 export interface MobileNavProps {
@@ -27,8 +28,7 @@ export interface MobileNavProps {
 
 export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key");
+  const key = pathname.includes('/gallary/')
 
   return (
     <Drawer
@@ -69,9 +69,13 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
       {
         !key &&
-        <Box component="nav" sx={{ flex: '1 1 auto', p: '12px' }}>
+        <Box pt={'16px'} component="nav" sx={{ px: '12px' }}>
           {renderNavItems({ pathname, items: navItems })}
         </Box>
+      }
+      {
+        !key &&
+       <PinedGallaries />
       }
     </Drawer>
   );

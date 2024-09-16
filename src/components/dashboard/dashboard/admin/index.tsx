@@ -20,10 +20,10 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import CustomModal from '@/components/common/modal';
 import { AddUser } from './components/addUser';
 import { Check } from '@phosphor-icons/react';
+import { useUser } from '@/hooks/use-user';
 
 
 export default function AdminDashboard() {
-    const { key } = useUserDashboard()
     const [rowsPerPage, setRowsPerPage] = React.useState<number>(5);
     const [page, setPage] = React.useState<number>(0);
     const router = useRouter()
@@ -35,6 +35,7 @@ export default function AdminDashboard() {
     const paginatedCustomers = applyPagination(adminUsers, page, rowsPerPage);
     const [successPopup, setSuccessPopup] = React.useState<boolean>(false)
     const [addUserPopup, setAddUserPopup] = React.useState<boolean>(false)
+    const {admin} = useUser()
 
     const getAdminUsers = async () => {
         setIsPending(true)
@@ -73,7 +74,11 @@ export default function AdminDashboard() {
     }, [])
 
     const navigateHandler = (id: any) => {
-        router.push(`${paths.dashboard.overview}/${id}`)
+        if (admin) {
+            router.push(`${paths.dashboard.overview}/user/${id}`)
+        }else{
+            router.push(`${paths.dashboard.overview}/${id}`)
+        }
     }
 
     const onAddUserHandler = async (input: string) => {
@@ -99,43 +104,40 @@ export default function AdminDashboard() {
 
     return (
         <Box>
-            {
-                key ?
-                    <GallaryItem /> : <Stack spacing={3}>
-                        <Box display={'flex'} justifyContent={'space-between'}>
-                            <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
-                                <Typography variant="h4">Users</Typography>
-                            </Stack>
-                            <div>
-                                <Button
-                                    onClick={() => setAddUserPopup(true)}
-                                    startIcon={
-                                        <PlusIcon fontSize="var(--icon-fontSize-md)" />
-                                    }
-                                    variant="contained">
-                                    Add
-                                </Button>
-                            </div>
-                        </Box>
-                        <CustomersFilters placeholder="Search Users by Email" />
-                        {isPending ?
-                            <Box display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                <CircularProgress />
-                            </Box> :
-                            <UsersTable
-                                getAdminUsers={getAdminUsers}
-                                navigateHandler={navigateHandler}
-                                admins={admins}
-                                count={adminUsers?.length}
-                                page={page}
-                                rows={paginatedCustomers}
-                                rowsPerPage={rowsPerPage}
-                                setRowsPerPage={setRowsPerPage}
-                                setPage={setPage}
-                            />
-                        }
+            <Stack spacing={3}>
+                <Box display={'flex'} justifyContent={'space-between'}>
+                    <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
+                        <Typography variant="h4">Users</Typography>
                     </Stack>
-            }
+                    <div>
+                        <Button
+                            onClick={() => setAddUserPopup(true)}
+                            startIcon={
+                                <PlusIcon fontSize="var(--icon-fontSize-md)" />
+                            }
+                            variant="contained">
+                            Add
+                        </Button>
+                    </div>
+                </Box>
+                <CustomersFilters placeholder="Search Users by Email" />
+                {isPending ?
+                    <Box display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <CircularProgress />
+                    </Box> :
+                    <UsersTable
+                        getAdminUsers={getAdminUsers}
+                        navigateHandler={navigateHandler}
+                        admins={admins}
+                        count={adminUsers?.length}
+                        page={page}
+                        rows={paginatedCustomers}
+                        rowsPerPage={rowsPerPage}
+                        setRowsPerPage={setRowsPerPage}
+                        setPage={setPage}
+                    />
+                }
+            </Stack>
             <CustomModal
                 open={addUserPopup}
                 handleClose={() => setAddUserPopup(false)}

@@ -3,11 +3,12 @@ import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { admin } from "./reducers/admin";
 import { auth } from "./reducers/auth";
+import { data } from "./reducers/data";
 
 const reducers = {
   auth: auth.reducer,
   admin: admin.reducer,
-  data: admin.reducer,
+  data: data.reducer,
 };
 
 const rootPersistConfig = {

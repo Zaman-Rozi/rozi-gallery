@@ -27,7 +27,6 @@ export default function Page() {
   const [page, setPage] = React.useState<number>(0);
   const dispatch = useDispatch()
   const galleries = useSelector(selectAdminGalleries);
-  console.log("galleries", galleries);
   
   const paginatedCustomers = applyPagination(galleries, page, rowsPerPage);
 

@@ -1,161 +1,49 @@
 'use client';
-import CustomModal from '@/components/common/modal';
-import useUserDashboard from '@/hooks/useUserDashboard';
-import { Alert, Avatar, Box, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import Divider from '@mui/material/Divider';
-import FormControl from '@mui/material/FormControl';
-import FormHelperText from '@mui/material/FormHelperText';
-import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Grid from '@mui/material/Unstable_Grid2';
-import { Check } from '@phosphor-icons/react';
-import Image from 'next/image';
-import { memo } from 'react';
+import useFirebase from '@/hooks/useFirebase';
+import { Box } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Form } from './form';
 
-const AddDataContainer = () => {
-    const {
-        loading,
-        errors,
-        handleMethod,
-        inputRef,
-        state,
-        selectedImageURL,
-        setSelectedImageURL,
-        successPopup,
-        setSuccessPopup,
-        limitOut
-    } = useUserDashboard()
+const AddDataContainer = ({ data, handleClose , userId}: any) => {
+    const { getFileUrl, createGallary } = useFirebase()
+    const [userData, setData] = useState(false)
 
+    useEffect(() => {
+        setData(data)
+    }, [data])
 
-    const ImageComponents = memo(() => (
-        <Box>
-            {
-                state?.selectFiles && state?.selectFiles?.length > 0 &&
-                <Box width={'fit-content'} mx={'auto'} mt={4}>
-                    <Card>
-                        <CardHeader subheader="Your images" title="Images" />
-                        <Box width={'content-fit'} p={'16px'} display={'flex'} gap={'16px'} flexWrap={'wrap'}>
-                            {
-                                state?.selectFiles?.map((url: any) => (
-                                    <Image style={{ borderRadius: '16px', cursor: 'pointer' }} width={200} height={200} onClick={() => setSelectedImageURL(url)} src={URL.createObjectURL(url)} alt='Image' />
-                                ))
-                            }
-                        </Box>
-                    </Card>
-                </Box>
-            }
-            {
-                selectedImageURL &&
-                <CustomModal
-                    open
-                    handleClose={() => setSelectedImageURL(null)}
-                    child={
-                        <Box>
-                            <img style={{ borderRadius: '16px', cursor: 'pointer', width: '100%', height: '100%' }} src={URL.createObjectURL(selectedImageURL)} alt="" />
-                        </Box>
+    const onSubmit = async (state: any, onSuccess: () => null, onError = () => null , prevFiles = []) => {
+        try {
+            const gallaryKey = `${state?.key};${state?.password}`
+            if (state?.files && gallaryKey) {
+                let files: string[] = await Promise.all(
+                    state?.files?.map(async (file: any) => {
+                        return await getFileUrl(file)
+                    })
+                );
+                if (files && files?.length > 0) {
+
+                    if (await createGallary(state, data?.key ? [ ...files , ...prevFiles ] : files, userData ? false : true , userId)) {
+                        onSuccess()
+                    } else {
+                        onError()
                     }
-                />
+                }
             }
-        </Box>
-    ))
-
+        } catch (error) {
+            onError()
+        }
+    }
 
     return (
-        <Box>
+        <Box >
             <Box maxWidth={'500px'} mx={'auto'}>
-                <Card>
-                    <CardHeader subheader="Add your memories" title="Dashboard" />
-                    <Divider />
-                    <CardContent>
-                        <Grid md={6} xs={12}>
-                            <FormControl fullWidth>
-                                <InputLabel>First Name</InputLabel>
-                                <OutlinedInput disabled={loading} value={state?.firstName} onChange={(e: any) => handleMethod('firstName', e)} />
-                                {errors?.firstNameError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
-                            </FormControl>
-                        </Grid>
-                        <Grid md={6} xs={12} mt={4}>
-                            <FormControl fullWidth>
-                                <InputLabel>Last Name</InputLabel>
-                                <OutlinedInput disabled={loading} value={state?.lastName} onChange={(e: any) => handleMethod('lastName', e)} />
-                                {errors?.lastNameError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
-                            </FormControl>
-                        </Grid>
-                        <Grid md={6} xs={12} mt={4}>
-                            <FormControl fullWidth>
-                                <InputLabel>Email</InputLabel>
-                                <OutlinedInput disabled={loading} type='email' value={state?.email} onChange={(e: any) => handleMethod('email', e)} />
-                                {errors?.emailError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
-                            </FormControl>
-                        </Grid>
-                        <Grid md={6} xs={12} mt={4}>
-                            <FormControl fullWidth>
-                                <InputLabel>Phone Number</InputLabel>
-                                <OutlinedInput disabled={loading} value={state?.phone} onChange={(e: any) => handleMethod('phone', e)} />
-                                {errors?.phoneError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
-                            </FormControl>
-                        </Grid>
-                        <Grid md={6} xs={12} mt={4}>
-                            <FormControl fullWidth required>
-                                <InputLabel>Secret key</InputLabel>
-                                <OutlinedInput disabled={loading} value={state?.key} onChange={(e: any) => handleMethod('key', e)} />
-                                {errors?.keyError ? <FormHelperText>{'Minimum 3 digits key allowed.'}</FormHelperText> : null}
-
-                            </FormControl>
-                        </Grid>
-                        <Grid md={6} xs={12} mt={4}>
-                            <FormControl fullWidth required>
-                                <InputLabel>Password</InputLabel>
-                                <OutlinedInput disabled={loading} value={state?.password} onChange={(e: any) => handleMethod('password', e)} />
-                                {errors?.passwordError ? <FormHelperText>{'Minimum 3 digits password allowed.'}</FormHelperText> : null}
-                            </FormControl>
-                        </Grid>
-                    </CardContent>
-                    {errors?.filesError ?
-                        <Box px={'2rem'}>
-                            <Alert color={'error'}>{'Minimum 1 file allowed'}</Alert>
-                        </Box>
-                        : null}
-                    <CardActions>
-                        <Button onClick={() => handleMethod('upload')} fullWidth variant="text">
-                            Select picture
-                        </Button>
-                    </CardActions>
-
-                </Card>
-                <CardActions sx={{ justifyContent: 'flex-end' }}>
-                    <Button
-                        disabled={loading}
-                        variant="contained"
-                        onClick={() => handleMethod('onSubmit')}
-                    >
-                        {loading ? "Saving..." : limitOut ? "Out of gallaries" : "Save"}
-                    </Button>
-                </CardActions>
-                <input
-                    disabled={loading}
-                    accept="image/*"
-                    ref={inputRef}
-                    style={{ display: 'none' }}
-                    type='file'
-                    onChange={(e: any) => handleMethod('selectFiles', e)}
-                    multiple
+                <Form
+                    onSubmit={onSubmit}
+                    data={userData}
+                    onClose={handleClose}
                 />
             </Box>
-            <ImageComponents />
-            <CustomModal open={successPopup} handleClose={() => setSuccessPopup(false)} child={<Box>
-                <Box display="flex" alignItems="center" flexDirection={'column'} justifyContent="center" mb={2}>
-                    <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
-                        <Check size={32} />
-                    </Avatar>
-                </Box>
-                <Typography fontWeight={700} fontSize={20} my={4} textAlign={'center'}> Details saved successfuly</Typography>
-            </Box>} />
         </Box>
     )
 }

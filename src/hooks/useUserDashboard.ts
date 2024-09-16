@@ -2,14 +2,17 @@
 
 import { db, storage } from '@/confiq/firebase';
 import { useUser } from '@/hooks/use-user';
+import { updateSearchData, updateUserGallaryItemByKey } from '@/store/reducers/auth';
+import { selectSearchData } from '@/store/selectors/aurh';
 import { saveAs } from 'file-saver';
-import { arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import JSZip from 'jszip';
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-const useUserDashboard = () => {
+const useUserDashboard = (props) => {
     const [state, setState] = useState<any>({})
     const [downloading, setDownloading] = useState<any>(false)
     const [limitOut, setLimitOut] = useState<any>(false)
@@ -27,13 +30,13 @@ const useUserDashboard = () => {
     const [successPopup, setSuccessPopup] = useState<boolean>(false)
     const [selectedImageURL, setSelectedImageURL] = useState<any>(null)
     const [getGallaryLoading, setGetGallaryLoading] = useState<boolean>(false)
-    const [totalGalaries, setTotalGalaries] = useState<any[]>([])
-    const [filesURLs, updateFilesURL] = useState<any>({})
+    const filesURLs = useSelector(selectSearchData)
     const inputRef = useRef<any>()
     const { user } = useUser()
     const searchParams = useSearchParams();
     const key = searchParams.get("key");
     const gallaryId = searchParams.get("id");
+    const dispatch = useDispatch()
 
     useEffect(() => {
         if (state?.key && state?.key?.length > 2) {
@@ -126,7 +129,9 @@ const useUserDashboard = () => {
     }
 
     const onSubmitHandler = async () => {
+        console.log(state);
         const { key, password, selectFiles } = state
+        console.log(state);
         if (!selectFiles) {
             setErrors({
                 ...errors,
@@ -163,29 +168,54 @@ const useUserDashboard = () => {
                         const subcollectionRef = collection(docRef, 'Gallary');
                         const specificDocRef = doc(subcollectionRef, `${key};${password}`);
 
-                        await setDoc(specificDocRef,
-                            {
-                                filesUrls: arrayUnion(...filesUrls),
-                                userDetails: {
+                            await setDoc(specificDocRef,
+                                {
+                                    filesUrls: arrayUnion(...filesUrls),
+                                    userDetails: {
+                                        firstName: state.firstName,
+                                        lastName: state.lastName,
+                                        email: state.email,
+                                        phone: state.phone,
+                                    }
+                                },
+                                {
+                                    merge: true
+                                },
+
+                            );
+                        setSuccessPopup(true)
+                    } catch (error) {
+                        console.log(error);
+                    } finally {
+                        const existingData = props?.existingData || {}
+                        if (existingData && existingData?.id) {
+                            props?.handleClose && props?.handleClose()
+                            if (key && gallaryId) {
+                                handleGetGallary('getGallary', password)
+                            }
+                            const docId = existingData?.id || ''
+                            const docFiles = existingData?.filesUrls || []
+                            dispatch(updateUserGallaryItemByKey({
+                                id: docId,
+                                key: "userDetails",
+                                value: {
                                     firstName: state.firstName,
                                     lastName: state.lastName,
                                     email: state.email,
                                     phone: state.phone,
                                 }
-                            },
-                            {
-                                merge: true
-                            },
-
-                        );
-                        setSuccessPopup(true)
-                    } catch (error) {
-                        console.log(error);
-                    } finally {
-                        setState({
-                            password: "",
-                            key: ""
-                        })
+                            }))
+                            dispatch(updateUserGallaryItemByKey({
+                                id: docId,
+                                key: "filesUrls",
+                                value: [...docFiles, ...filesUrls]
+                            }))
+                        } else {
+                            setState({
+                                password: "",
+                                key: ""
+                            })
+                        }
                         setLoading(false)
                     }
                 } else {
@@ -215,16 +245,16 @@ const useUserDashboard = () => {
         }
     }
 
-    const getGallaryHandler = async () => {
-        if (popupState?.password && popupState?.password?.length > 2 && gallaryId && key) {
-            updateFilesURL({})
+    const getGallaryHandler = async (password?: string) => {
+        if ((popupState?.password && popupState?.password?.length > 2 || password) && gallaryId && key) {
+            dispatch(updateSearchData({}))
             setGetGallaryLoading(true)
-            const docRef = doc(db, 'Gallaries', gallaryId, 'Gallary', `${key};${popupState?.password}`);
+            const docRef = doc(db, 'Gallaries', gallaryId, 'Gallary', `${key};${password || popupState?.password}`);
             try {
                 const docSnapshot = await getDoc(docRef);
                 if (docSnapshot.exists()) {
                     const galleryData: any = { id: docSnapshot.id, ...docSnapshot.data() };
-                    updateFilesURL(galleryData)
+                    dispatch(updateSearchData(galleryData))
                     setPopupState({ ...popupState, password: '', notFound: false })
                 } else {
                     setPopupState({ ...popupState, password: '', notFound: true, errorMsg: 'Not found' })
@@ -279,9 +309,62 @@ const useUserDashboard = () => {
             setPopupState({ ...popupState, password: data?.target?.value })
         }
         if (type === 'getGallary') {
-            getGallaryHandler()
+            getGallaryHandler(data)
         }
     }
+
+    useEffect(() => {
+        const existingData = props?.existingData || {}
+        const details = existingData?.userDetails || {}
+        const docId = existingData?.id || ''
+        const docFiles = existingData?.filesUrls || ''
+        if (props?.existingData && props?.existingData?.id) {
+            setState({
+                email: details?.email || "",
+                firstName: details?.firstName || "",
+                lastName: details?.lastName || "",
+                phone: details?.phone || "",
+                key: docId?.split(';')?.[0] || "",
+                password: docId?.split(';')?.[1] || "",
+                userFiles: docFiles || []
+            })
+        }
+    }, [props?.existingData])
+
+    const onSingleDeleteHandler = async (item: string) => {
+        if (props?.existingData) {
+            const filteredFiles = state?.userFiles?.filter((file: string) => file !== item)
+            setState({
+                ...state,
+                userFiles: filteredFiles || []
+            })
+            const existingData = props?.existingData || {}
+            const docId = existingData?.id || ''
+            const payload = {
+                id: docId,
+                key: "filesUrls",
+                value: filteredFiles
+            }
+            dispatch(updateUserGallaryItemByKey(payload))
+            if (filesURLs && gallaryId && key) {
+                console.log(state);
+
+                dispatch(updateSearchData({ ...filesURLs, filesUrls: filteredFiles }))
+            }
+            try {
+                const docRef = doc(db, 'Gallaries', user?.uid, 'Gallary', docId);
+                await updateDoc(docRef, {
+                    filesUrls: arrayRemove(item)
+                });
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
+
+    useEffect(() => {
+        dispatch(updateSearchData({}))
+    }, [])
 
     return {
         loading,
@@ -301,7 +384,8 @@ const useUserDashboard = () => {
         setSuccessPopup,
         downloadImagesAsZip,
         downloading,
-        limitOut
+        limitOut,
+        onSingleDeleteHandler
     }
 }
 

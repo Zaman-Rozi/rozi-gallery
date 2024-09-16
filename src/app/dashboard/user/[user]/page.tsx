@@ -3,61 +3,38 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
-import dayjs from 'dayjs';
 import * as React from 'react';
 
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
 import type { Customer } from '@/components/dashboard/customer/customers-table';
-import { CustomersTable } from '@/components/dashboard/customer/customers-table';
-import { db } from '@/confiq/firebase';
-import { useUser } from '@/hooks/use-user';
+import FoldersTable from '@/components/dashboard/dashboard/user/components/foldersTable';
 import { paths } from '@/paths';
-import { collection, getDocs } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateUserGalleries } from '@/store/reducers/auth';
 import { selectGalleries } from '@/store/selectors/aurh';
+import { selectFoldersLoading, selectUserFolders } from '@/store/selectors/data';
 import { Box, CircularProgress } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import useFirebase from '@/hooks/useFirebase';
 
-export default function Page() {
-  const { user } = useUser()
-  const [isPending, setIsPending] = React.useState<boolean>(false);
+export default function Page({ params }: any) {
   const [rowsPerPage, setRowsPerPage] = React.useState<number>(5);
   const [page, setPage] = React.useState<number>(0);
-
+  const {getUserFolders} = useFirebase()
   const router = useRouter()
-  const dispatch = useDispatch()
   const galleries = useSelector(selectGalleries)
-
-  const paginatedCustomers = applyPagination(galleries, page, rowsPerPage);
-
-  const getGalleries = async () => {
-    setIsPending(true)
-    const collectionRef = collection(db, 'Gallaries', user?.uid, 'Gallary');
-
-    try {
-      const querySnapshot = await getDocs(collectionRef);
-      const galleriesData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      dispatch(updateUserGalleries(galleriesData))
-    } catch (error) {
-      console.error("Error getting galleries data: ", error);
-    } finally {
-      setIsPending(false)
-    }
-  }
-
+  const userFolders = useSelector(selectUserFolders)
+  const paginatedCustomers = applyPagination(userFolders, page, rowsPerPage);
+  const isPending = useSelector(selectFoldersLoading)
   React.useEffect(() => {
-    getGalleries()
+    if (params && params?.user) {
+      getUserFolders(params?.user)
+    }
   }, [])
-
   return (
     <Stack spacing={3}>
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
-          <Typography variant="h4">Galleries</Typography>
+          <Typography variant="h4">Folder</Typography>
         </Stack>
         <div>
           <Button onClick={() => router.push(paths.dashboard.overview)} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
@@ -65,24 +42,23 @@ export default function Page() {
           </Button>
         </div>
       </Stack>
-      <CustomersFilters placeholder="Search gallary by key" />
+      <CustomersFilters setSearch={() => null} placeholder="Search folder" />
       {isPending ?
         <Box display={'flex'} justifyContent={'center'} alignItems={'center'}>
           <CircularProgress />
-        </Box> :
-        <CustomersTable
-          galleryId={user?.uid}
+        </Box> : <FoldersTable
           count={galleries?.length}
           page={page}
           rows={paginatedCustomers}
           rowsPerPage={rowsPerPage}
           setRowsPerPage={setRowsPerPage}
           setPage={setPage}
+          router={router}
         />}
     </Stack>
   );
 }
 
 function applyPagination(rows: Customer[], page: number, rowsPerPage: number): Customer[] {
-  return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  return rows?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
