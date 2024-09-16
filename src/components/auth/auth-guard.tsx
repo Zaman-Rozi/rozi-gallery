@@ -9,10 +9,9 @@ import { paths } from '@/paths';
 
 export interface AuthGuardProps {
   children: React.ReactNode;
-  params: any;
 }
 
-export function AuthGuard({ children, params }: AuthGuardProps): React.JSX.Element | null {
+export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element | null {
   const router = useRouter();
   const { token } = useUser();
   const path = usePathname()
