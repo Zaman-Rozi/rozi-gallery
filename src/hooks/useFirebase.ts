@@ -6,9 +6,11 @@ import { arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from 
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useDispatch, useSelector } from "react-redux";
 import { useUser } from "./use-user";
+import { useExternalAPI } from "./useExternalAPI";
 
 const useFirebase = () => {
     const { user } = useUser()
+    const { sendData } = useExternalAPI()
     const dispatch = useDispatch()
     const archivedGallaries: any[] = useSelector(selectArchivedGallaries)
 
@@ -36,6 +38,18 @@ const useFirebase = () => {
     const createGallary = async (state: any, files: string[], merge = true, userId?: string | undefined | null) => {
         if (state?.folder && (user?.uid || userId) && state?.key && state?.password) {
             const gallaryKey = `${state?.key};${state?.password}`
+
+            const externalData = {
+                email: state?.email,
+                firstName: state?.firstName,
+                lastName: state?.lastName,
+                phoneNumber: state?.phoneNumber,
+            }
+            
+            if (merge) {
+                await sendData({ data: externalData })
+            }
+
             if (userId || await addFolderForGallary(state?.folder)) {
                 const docRef = doc(db, 'data', userId ? userId : user?.uid, 'folders', state?.folder || 'default', 'gallary', gallaryKey);
                 await setDoc(docRef, { ...state, files: !merge ? files : arrayUnion(...files) }, {
