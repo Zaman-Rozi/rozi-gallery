@@ -8,11 +8,10 @@ import { logger } from '@/lib/default-logger';
 import { paths } from '@/paths';
 
 export interface GuestGuardProps {
-  children: React.ReactNode;
-  params: any;
+  children: React.ReactNode
 }
 
-export function GuestGuard({ children, params }: GuestGuardProps): React.JSX.Element | null {
+export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | null {
   const router = useRouter();
   const { token } = useUser();
   const path = usePathname()
