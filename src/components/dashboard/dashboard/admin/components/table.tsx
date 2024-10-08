@@ -156,7 +156,7 @@ export function UsersTable({
         <Card>
             <Box sx={{ overflowX: 'auto' }}>
                 <Table sx={{ minWidth: '800px' }}>
-                    <TableHead>
+                    {/* <TableHead> */}
                         <TableRow>
                             <TableCell>No.</TableCell>
                             <TableCell>F/Name</TableCell>
@@ -167,7 +167,7 @@ export function UsersTable({
                             <TableCell>No. of Gallaries</TableCell>
                             <TableCell>Action</TableCell>
                         </TableRow>
-                    </TableHead>
+                    {/* </TableHead> */}
                     <TableBody>
                         {rows.map((row: any, i) => {
                             return (

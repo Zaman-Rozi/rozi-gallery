@@ -132,7 +132,7 @@ const GallaryItem = ({ params }: any) => {
                         <Box width={'content-fit'} p={'16px'} display={'flex'} gap={'16px'} flexWrap={'wrap'}>
                             {
                                 data?.files?.map((url: string) => (
-                                    <Image onClick={() => setSelectedImageURL(url)} style={{ borderRadius: '16px', cursor: 'pointer' }} width={200} height={200} src={url} alt='Image' />
+                                    <img onClick={() => setSelectedImageURL(url)} style={{ borderRadius: '16px', cursor: 'pointer', objectFit:"cover", width:"300px", height:"250px" }}  src={url} alt='Image' />
                                 ))
                             }
                         </Box>

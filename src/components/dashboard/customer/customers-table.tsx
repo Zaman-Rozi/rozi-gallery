@@ -149,7 +149,7 @@ export function CustomersTable({
     <Card>
       <Box sx={{ overflowX: 'auto' }}>
         <Table sx={{ minWidth: '800px' }}>
-          <TableHead>
+          {/* <TableHead> */}
             <TableRow>
               <TableCell>Key</TableCell>
               <TableCell>Password</TableCell>
@@ -163,7 +163,7 @@ export function CustomersTable({
               <TableCell>Action</TableCell>
               <TableCell style={{ minWidth: '200px' }}>Anyone can add this</TableCell>
             </TableRow>
-          </TableHead>
+          {/* </TableHead> */}
           <TableBody>
             {rows.map((row: any, i) => {
               return (

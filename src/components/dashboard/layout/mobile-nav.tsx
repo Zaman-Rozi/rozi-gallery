@@ -61,7 +61,7 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
       <Stack spacing={2} sx={{ p: 3 }}>
         <Typography
           component="span"
-          sx={{ color: 'inherit', fontSize: '1rem', fontWeight: 500, lineHeight: '28px' }}
+          sx={{ color: 'white', fontSize: '1rem', fontWeight: 500, lineHeight: '28px' }}
         >
           My Gallary
         </Typography>

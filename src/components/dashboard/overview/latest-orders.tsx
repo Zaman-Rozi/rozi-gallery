@@ -41,14 +41,14 @@ export function LatestOrders({ orders = [], sx }: LatestOrdersProps): React.JSX.
       <Divider />
       <Box sx={{ overflowX: 'auto' }}>
         <Table sx={{ minWidth: 800 }}>
-          <TableHead>
+          {/* <TableHead> */}
             <TableRow>
               <TableCell>Order</TableCell>
               <TableCell>Customer</TableCell>
               <TableCell sortDirection="desc">Date</TableCell>
               <TableCell>Status</TableCell>
             </TableRow>
-          </TableHead>
+          {/* </TableHead> */}
           <TableBody>
             {orders.map((order) => {
               const { label, color } = statusMap[order.status] ?? { label: 'Unknown', color: 'default' };

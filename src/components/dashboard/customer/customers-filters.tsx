@@ -15,7 +15,7 @@ export function CustomersFilters({ placeholder, search, setSearch }: any) {
         placeholder={placeholder}
         startAdornment={
           <InputAdornment position="start">
-            <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
+            <MagnifyingGlassIcon color='white' fontSize="var(--icon-fontSize-md)" />
           </InputAdornment>
         }
         sx={{ maxWidth: '500px' }}

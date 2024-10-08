@@ -31,11 +31,9 @@ const FoldersTable = ({ count = 0,
         <Card>
             <Box sx={{ overflowX: 'auto' }}>
                 <Table sx={{ minWidth: '800px' }}>
-                    <TableHead>
                         <TableRow>
                             <TableCell>Folders</TableCell>
                         </TableRow>
-                    </TableHead>
                     <TableBody>
                         {rows.map((row: any, i) => {
                             return (

@@ -15,6 +15,7 @@ import { useUser } from '@/hooks/use-user';
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
 import { PinedGallaries } from './pinedGallaries';
+import Image from 'next/image';
 
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
@@ -50,14 +51,9 @@ export function SideNav(): React.JSX.Element {
       }}
     >
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Typography
-          component="span"
-          sx={{ color: 'inherit', fontSize: '1rem', fontWeight: 500, lineHeight: '28px' }}
-        >
-          My Gallary
-        </Typography>
+       <img alt='Logo'  src='/logo.png' />
       </Stack>
-      <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
+      {/* <Divider sx={{ borderColor: '#B90808' }} /> */}
       {
         !key &&
         <Box  pt={'16px'} component="nav" sx={{ px: '12px' }}>

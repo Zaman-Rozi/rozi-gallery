@@ -44,13 +44,13 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
       >
         <Stack spacing={3}>
           <Stack spacing={1}>
-            <Typography color="inherit" sx={{ fontSize: '24px', lineHeight: '32px', textAlign: 'center' }} variant="h1">
+            <Typography color="white" sx={{ fontSize: '24px', lineHeight: '32px', textAlign: 'center' }} variant="h1">
               Welcome to{' '}
-              <Box component="span" sx={{ color: '#15b79e' }}>
+              <Box component="span" sx={{ color: '#B90808' }}>
                 Gallary
               </Box>
             </Typography>
-            <Typography align="center" variant="subtitle1">
+            <Typography align="center" color={'white'} variant="subtitle1">
               A plate form where you can save you memories.
             </Typography>
           </Stack>
