@@ -15,27 +15,33 @@ export interface LayoutProps {
 export function Layout({ children }: LayoutProps): React.JSX.Element {
   return (
     <Box
+    
       sx={{
         display: { xs: 'flex', lg: 'grid' },
         flexDirection: 'column',
         gridTemplateColumns: '1fr 1fr',
         minHeight: '100%',
+        // background:"linear-gradient(90deg, rgba(0,0,0,1) 22%, rgba(185,8,8,0.8786108193277311) 100%)",
+        // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.6)",
       }}
     >
-      <Box sx={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column', position:"relative" }}>
+      <Box className="bg-pattern" />
+
         <Box sx={{ p: 3 }}>
           <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-            {/* <DynamicLogo colorDark="light" colorLight="dark" height={32} width={122} /> */}
+          <DynamicLogo  colorDark="light" colorLight="dark"  width={222} />
           </Box>
         </Box>
         <Box sx={{ alignItems: 'center', display: 'flex', flex: '1 1 auto', justifyContent: 'center', p: 3 }}>
-          <Box sx={{ maxWidth: '450px', width: '100%' }}>{children}</Box>
+
+          <Box sx={{ maxWidth: '550px', width: '100%' }}>{children}</Box>
         </Box>
       </Box>
       <Box
         sx={{
           alignItems: 'center',
-          background: 'radial-gradient(50% 50% at 50% 50%, #122647 0%, #090E23 100%)',
+          background: 'black',
           color: 'var(--mui-palette-common-white)',
           display: { xs: 'none', lg: 'flex' },
           justifyContent: 'center',
@@ -47,7 +53,7 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
             <Typography color="white" sx={{ fontSize: '24px', lineHeight: '32px', textAlign: 'center' }} variant="h1">
               Welcome to{' '}
               <Box component="span" sx={{ color: '#B90808' }}>
-                Gallary
+                Focus Fuse
               </Box>
             </Typography>
             <Typography align="center" color={'white'} variant="subtitle1">

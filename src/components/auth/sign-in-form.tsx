@@ -131,7 +131,8 @@ export function SignInForm(): React.JSX.Element {
   );
 
   return (
-    <Stack spacing={4}>
+    <Stack  padding={"50px"} paddingY={"100px"} position={"relative"} borderRadius={"10px"} spacing={4}>
+      <div className='form-bg' />
       <Stack spacing={1}>
         <Typography variant="h4">Sign in</Typography>
         <Typography color="text.secondary" variant="body2">
