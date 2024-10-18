@@ -12,6 +12,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Flex, FormInput } from './components';
 import useFirebase from '@/hooks/useFirebase';
+import { sendEmailForAddGallery } from '@/confiq/email';
 
 export const Form = (props: any) => {
     const inputRef: any = useRef()
@@ -161,8 +162,16 @@ export const Form = (props: any) => {
     }
 
     const onSubmitHandler = () => {
+        
         const onSuccess = () => {
+            //  sendEmailForAddGallery({
+            //         to_name: state.firstName,
+            //         email_to: state.email,
+            //         gallery_link: "",
+            //         password: state.password
+            //     })
             if (data) {
+               
                 onClose()
             }
             setLoading(false)
@@ -176,7 +185,7 @@ export const Form = (props: any) => {
         setState(initialState)
         inputRef.current.value = null
     }
-
+    // craeteURLfromGallaryID({ gallaryId: row?.key, userId: galleryId, folderName: row?.folder })
     return (
         <>
             <Card>

@@ -21,6 +21,7 @@ import CustomModal from '@/components/common/modal';
 import { AddUser } from './components/addUser';
 import { Check } from '@phosphor-icons/react';
 import { useUser } from '@/hooks/use-user';
+import { sendEmailForAddUser } from '@/confiq/email';
 
 
 export default function AdminDashboard() {
@@ -89,6 +90,7 @@ export default function AdminDashboard() {
                 await addDoc(collection(db, 'allowedUsers'), {
                     email: input,
                 });
+                sendEmailForAddUser({to_name:"user", message:"You have been invited on FocusFuse. Please create your account", email_to: input})
                 setAddUserPopup(false)
                 setSuccessPopup(true)
                 setTimeout(() => {
