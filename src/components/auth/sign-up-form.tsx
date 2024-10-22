@@ -73,7 +73,7 @@ export function SignUpForm(): React.JSX.Element {
         <Typography color="text.secondary" variant="body2">
           Already have an account?{' '}
           <Link component={RouterLink} href={paths.auth.signIn} underline="hover" variant="subtitle2">
-            Sign in
+            {/* Sign in */}
           </Link>
         </Typography>
       </Stack>

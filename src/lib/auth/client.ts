@@ -96,6 +96,8 @@ class AuthClient {
     if (isAdminLogin) {
       const q = await query(collection(db, "Admins"), where("email", "==", email));
       const querySnapshot = await getDocs(q);
+      console.log("querySnapshot", querySnapshot);
+      
       let res = {}
       querySnapshot.forEach((doc) => {
         if (!doc.data()?.isBlocked) {

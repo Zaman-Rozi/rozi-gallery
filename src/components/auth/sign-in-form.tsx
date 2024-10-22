@@ -33,7 +33,7 @@ const schema = zod.object({
 
 type Values = zod.infer<typeof schema>;
 
-const defaultValues = { email: 'admin@gmail.com', password: '123456' } satisfies Values;
+const defaultValues = { email: '', password: '' } satisfies Values;
 
 export function SignInForm(): React.JSX.Element {
   const router: any = useRouter();
@@ -75,6 +75,7 @@ export function SignInForm(): React.JSX.Element {
         }
         const q = await query(collection(db, "Users"), where("email", "==", values?.email));
         const querySnapshot = await getDocs(q);
+        
         querySnapshot.forEach((doc: any) => {
           const { blocked, deleted } = doc?.data()
           
@@ -82,7 +83,7 @@ export function SignInForm(): React.JSX.Element {
             blockedS = true
           }
           if (deleted) {
-            deletedS = true
+            // deletedS = true
           }
           if (!deleted && !blocked) {
             dispath(addUser({ ...res?.data, ...doc.data() }))
@@ -110,6 +111,7 @@ export function SignInForm(): React.JSX.Element {
         }
 
         if (res?.type && res?.message && !blockedS && !deletedS) {
+          
           setError('root', {
             type: res?.type,
             message: res?.message

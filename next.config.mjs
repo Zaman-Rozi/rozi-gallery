@@ -9,8 +9,8 @@ const config = {
         appId: "1:926606607566:web:620b177aa3070e0f9c7c9f",
         measurementId: "G-83DFM0VPHG",
         storageBucketPath:'gs://my-gallary-ac93e.appspot.com',
-        // frontEndURL:"http://localhost:3000"
-        frontEndURL:"https://rozi-gallery.vercel.app"
+        frontEndURL:"http://localhost:3000"
+        // frontEndURL:"https://rozi-gallery.vercel.app"
     },
     eslint: {
         ignoreDuringBuilds: true,
