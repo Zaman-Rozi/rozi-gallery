@@ -8,8 +8,8 @@ interface ICraeteURLfromGallaryID {
 }
 export const craeteURLfromGallaryID = ({ gallaryId, userId, folderName }: ICraeteURLfromGallaryID) => {
     if (typeof gallaryId === 'string') {
-        // const URL = `https://rozi-gallery.vercel.app/dashboard/f/${folderName}/gallary/${userId}/${gallaryId}`
-        const URL = `http://localhost:3000/dashboard/f/${folderName}/gallary/${userId}/${gallaryId}`
+        const URL = `https://rozi-gallery.vercel.app/dashboard/f/${folderName}/gallary/${userId}/${gallaryId}`
+        // const URL = `http://localhost:3000/dashboard/f/${folderName}/gallary/${userId}/${gallaryId}`
         return URL
     } else {
         console.log('error while creating redirect link');
@@ -19,8 +19,8 @@ export const craeteURLfromGallaryID = ({ gallaryId, userId, folderName }: ICraet
 
 export const createFolderURL = (folderName: string) => {
     if (typeof folderName === 'string') {
-        // const URL = `https://rozi-gallery.vercel.app/dashboard/f/${folderName}`
-        const URL = `http://localhost:3000/dashboard/f/${folderName}`
+        const URL = `https://rozi-gallery.vercel.app/dashboard/f/${folderName}`
+        // const URL = `http://localhost:3000/dashboard/f/${folderName}`
         return URL
     } else {
         console.log('error while creating redirect link');
