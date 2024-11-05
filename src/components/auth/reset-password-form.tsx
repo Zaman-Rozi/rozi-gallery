@@ -14,6 +14,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 
 import { authClient } from '@/lib/auth/client';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 
 const schema = zod.object({ email: zod.string().min(1, { message: 'Email is required' }).email() });
 
@@ -35,11 +36,22 @@ export function ResetPasswordForm(): React.JSX.Element {
     async (values: any): Promise<void> => {
       setIsPending(true);
 
+      console.log(values);
+
       const { error } = await authClient.resetPassword(values);
 
+      const auth = getAuth();
+      sendPasswordResetEmail(auth, values?.email)
+        .then(() => {
+          setError('root', { type: 'success', message: 'Password reset email sent!' });
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          setError('root', { type: 'server', message: errorMessage || 'Some thing went wrong' });
+          setIsPending(false);
+        });
+
       if (error) {
-        setError('root', { type: 'server', message: error });
-        setIsPending(false);
         return;
       }
 
